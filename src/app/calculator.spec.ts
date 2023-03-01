@@ -27,4 +27,12 @@ describe('Test for Calculator', () => {
     expect(rta1).toEqual(2);
     expect(rta2).toEqual(2);
   });
+  it('#divide should return null', () => {
+    //Arrange
+    const calculator = new Calculator();
+    //Act
+    const rta1 = calculator.divide(4, 0);
+    //Assert
+    expect(rta1).toBeNull();
+  });
 });
