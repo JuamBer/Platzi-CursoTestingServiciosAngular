@@ -12,8 +12,6 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     const calculator = new Calculator();
     const rta = calculator.multiply(3, 3);
-    console.log(rta);
     const rta2 = calculator.multiply(3, 0);
-    console.log(rta2);
   }
 }
