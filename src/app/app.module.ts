@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -15,6 +16,7 @@ import { ProductsComponent } from './components/products/products.component';
     AppRoutingModule,
     HttpClientModule,
     ReactiveFormsModule,
+    HttpClientTestingModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
