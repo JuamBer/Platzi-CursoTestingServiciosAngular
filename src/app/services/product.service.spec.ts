@@ -1,3 +1,4 @@
+import { HttpStatusCode } from '@angular/common/http';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -177,6 +178,50 @@ fdescribe('ProductService', () => {
       const req = httpController.expectOne(url);
       expect(req.request.method).toEqual('DELETE');
       req.flush(mockData);
+    });
+  });
+
+  describe('test for getOne', () => {
+    it('should getOne a product', (doneFn) => {
+      // Arrange
+      const mockData: Product = generateOneProduct();
+      const productId = '1';
+      // Act
+      service.getOne(productId).subscribe((data) => {
+        // Assert
+        expect(data).toEqual(mockData);
+        doneFn();
+      });
+
+      // http config
+      const url = `${environment.API_URL}/api/v1/products/${productId}`;
+      const req = httpController.expectOne(url);
+      expect(req.request.method).toEqual('GET');
+      req.flush(mockData);
+    });
+  });
+
+  describe('test for getOne ERR', () => {
+    it('should 404', (doneFn) => {
+      // Arrange
+      const msg = '404 message';
+      const mockError = {
+        status: HttpStatusCode.NotFound,
+        statusText: msg,
+      };
+      const productId = '1';
+      // Act
+      service.getOne(productId).subscribe({
+        error: (err) => {
+          expect(err).toEqual('El producto no existe');
+        },
+      });
+
+      // http config
+      const url = `${environment.API_URL}/api/v1/products/${productId}`;
+      const req = httpController.expectOne(url);
+      expect(req.request.method).toEqual('GET');
+      req.flush(msg, mockError);
     });
   });
 });
