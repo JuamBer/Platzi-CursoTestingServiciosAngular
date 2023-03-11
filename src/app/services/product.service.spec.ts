@@ -8,7 +8,7 @@ import {
   generateManyProduct,
   generateOneProduct,
 } from '../models/product.mock';
-import { Product } from '../models/product.model';
+import { CreateProductDTO, Product } from '../models/product.model';
 import { ProductService } from './product.service';
 
 fdescribe('ProductService', () => {
@@ -22,6 +22,10 @@ fdescribe('ProductService', () => {
     });
     service = TestBed.inject(ProductService);
     httpController = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpController.verify();
   });
 
   it('should be create', () => {
@@ -41,7 +45,6 @@ fdescribe('ProductService', () => {
         `${environment.API_URL}/api/v1/products`
       );
       req.flush(mockData);
-      httpController.verify;
     });
   });
 
@@ -60,7 +63,6 @@ fdescribe('ProductService', () => {
         `${environment.API_URL}/api/v1/products`
       );
       req.flush(mockData);
-      httpController.verify();
     });
 
     it('should return a product list with taxes', (doneFn) => {
@@ -83,7 +85,6 @@ fdescribe('ProductService', () => {
         `${environment.API_URL}/api/v1/products`
       );
       req.flush(mockData);
-      httpController.verify();
     });
 
     it('should return a product list with limit 10 offset 3', (doneFn) => {
@@ -104,7 +105,30 @@ fdescribe('ProductService', () => {
       expect(params.get('limit')).toEqual(`${limit}`);
       expect(params.get('offset')).toEqual(`${offset}`);
       req.flush(mockData);
-      httpController.verify();
+    });
+  });
+
+  describe('pruebas para create', () => {
+    it('should return a new product', (doneFn) => {
+      const mockData: Product = generateOneProduct();
+      const dto: CreateProductDTO = {
+        title: '',
+        price: 100,
+        images: [],
+        description: '',
+        categoryId: 1,
+      };
+      service.create({ ...dto }).subscribe((data) => {
+        expect(data).toEqual(mockData);
+        doneFn();
+      });
+
+      const req = httpController.expectOne(
+        `${environment.API_URL}/api/v1/products`
+      );
+      req.flush(mockData);
+      expect(req.request.body).toEqual(dto);
+      expect(req.request.method).toEqual('POST');
     });
   });
 });
