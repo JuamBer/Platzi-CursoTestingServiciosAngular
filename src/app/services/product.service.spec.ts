@@ -1,10 +1,11 @@
-import { HttpStatusCode } from '@angular/common/http';
+import { HttpStatusCode, HTTP_INTERCEPTORS } from '@angular/common/http';
 import {
   HttpClientTestingModule,
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from 'src/environments/environment';
+import { TokenInterceptor } from '../interceptors/token.interceptor';
 import {
   generateManyProduct,
   generateOneProduct,
@@ -15,18 +16,29 @@ import {
   UpdateProductDTO,
 } from '../models/product.model';
 import { ProductService } from './product.service';
+import { TokenService } from './token.service';
 
 fdescribe('ProductService', () => {
   let service: ProductService;
   let httpController: HttpTestingController;
+  let tokenService: TokenService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [ProductService],
+      providers: [
+        ProductService,
+        TokenService,
+        {
+          provide: HTTP_INTERCEPTORS,
+          useClass: TokenInterceptor,
+          multi: true,
+        },
+      ],
     });
     service = TestBed.inject(ProductService);
     httpController = TestBed.inject(HttpTestingController);
+    tokenService = TestBed.inject(TokenService);
   });
 
   afterEach(() => {
@@ -40,6 +52,8 @@ fdescribe('ProductService', () => {
   describe('pruebas para getAllSimple', () => {
     it('should return a product list', (doneFn) => {
       const mockData: Product[] = generateManyProduct(10);
+      spyOn(tokenService, 'getToken').and.returnValue('123');
+
       service.getAllSimple().subscribe((data) => {
         expect(data.length).toEqual(mockData.length);
         expect(data).toEqual(mockData);
@@ -49,6 +63,8 @@ fdescribe('ProductService', () => {
       const req = httpController.expectOne(
         `${environment.API_URL}/api/v1/products`
       );
+      const headers = req.request.headers;
+      expect(headers.get('Authorization')).toEqual(`Bearer 123`);
       req.flush(mockData);
     });
   });
@@ -214,6 +230,7 @@ fdescribe('ProductService', () => {
       service.getOne(productId).subscribe({
         error: (err) => {
           expect(err).toEqual('El producto no existe');
+          doneFn();
         },
       });
 
