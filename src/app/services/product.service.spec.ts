@@ -67,17 +67,42 @@ fdescribe('ProductService', () => {
       const mockData: Product[] = [
         { ...generateOneProduct(), price: 100 },
         { ...generateOneProduct(), price: 200 },
+        { ...generateOneProduct(), price: 0 },
+        { ...generateOneProduct(), price: -100 },
       ];
       service.getAll().subscribe((data) => {
         expect(data.length).toEqual(mockData.length);
         expect(data[0].taxes).toEqual(19);
         expect(data[1].taxes).toEqual(38);
+        expect(data[2].taxes).toEqual(0);
+        expect(data[3].taxes).toEqual(0);
         doneFn();
       });
 
       const req = httpController.expectOne(
         `${environment.API_URL}/api/v1/products`
       );
+      req.flush(mockData);
+      httpController.verify();
+    });
+
+    it('should return a product list with limit 10 offset 3', (doneFn) => {
+      const mockData: Product[] = generateManyProduct(20);
+      const limit = 10;
+      const offset = 3;
+
+      service.getAll(limit, offset).subscribe((data) => {
+        expect(data.length).toEqual(mockData.length);
+        doneFn();
+      });
+
+      const req = httpController.expectOne(
+        `${environment.API_URL}/api/v1/products?limit=${limit}&offset=${offset}`
+      );
+      const params = req.request.params;
+
+      expect(params.get('limit')).toEqual(`${limit}`);
+      expect(params.get('offset')).toEqual(`${offset}`);
       req.flush(mockData);
       httpController.verify();
     });
